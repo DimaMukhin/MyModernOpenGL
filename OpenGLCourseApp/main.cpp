@@ -173,6 +173,7 @@ void CompileShaders()
 	}
 
 	uniformModel = glGetUniformLocation(shader, "model");
+	uniformProjection = glGetUniformLocation(shader, "projection");
 }
 
 int main()
@@ -228,6 +229,8 @@ int main()
 	CreateTriangle();
 	CompileShaders();
 
+	glm::mat4 projection = glm::perspective(45.0f, (GLfloat) bufferWidth / (GLfloat) bufferHeight, 0.1f, 100.0f);
+
 	// Loop until window closed
 	while (!glfwWindowShouldClose(mainWindow))
 	{
@@ -249,7 +252,7 @@ int main()
 			direction = !direction;
 		}
 
-		curAngle += 0.1f;
+		curAngle += 0.5f;
 		if (curAngle >= 360)
 		{
 			curAngle -= 360;
@@ -277,11 +280,13 @@ int main()
 		glUseProgram(shader);
 
 		glm::mat4 model;
-		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
 		model = glm::rotate(model, curAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4, 0.4, 1.0f));
 
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model)); // giving the shader our uniform value
+
+		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection)); // giving the shader our uniform projection value
 
 		glBindVertexArray(VAO); // work with VAO we created (it is connected with VBO)
 
