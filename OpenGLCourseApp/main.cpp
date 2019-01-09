@@ -13,7 +13,7 @@
 const GLint WIDTH = 800, HEIGHT = 600;
 const float toRadians = 3.14159265f / 180.0f;
 
-GLuint VAO, VBO, shader, uniformModel;
+GLuint VAO, VBO, IBO, shader, uniformModel, uniformProjection;
 
 bool direction = true;
 float triOffset = 0.0f;
@@ -36,10 +36,11 @@ layout (location = 0) in vec3 pos;									\n\
 out vec4 vCol;																	\n\
 																	\n\
 uniform mat4 model;																	\n\
+uniform mat4 projection;																	\n\
 																	\n\
 void main()															\n\
 {																	\n\
-	gl_Position = model * vec4(pos, 1.0f);					\n\
+	gl_Position = projection * model * vec4(pos, 1.0f);					\n\
 	vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);																	\n\
 }																	\n\
 ";
@@ -60,8 +61,20 @@ void main()															\n\
 
 void CreateTriangle()
 {
+	// this is indexed draws
+	// we will use this to tell opengl what trianges to draw easier
+	// every 3 indexes is 1 triangle (way easier)
+	// we use IBO for this thing
+	unsigned int indices[] = {
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2
+	};
+
 	GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 1.0f,
 		1.0f, -1.0f, 0.0f,
 		0.0f, 1.0f, 0.0f
 	};
@@ -69,6 +82,10 @@ void CreateTriangle()
 	// creating our VAO
 	glGenVertexArrays(1, &VAO); // amount and where to store the id. VAO is metadata of vertices
 	glBindVertexArray(VAO); // we need to bind it (see theory lecture for more details)
+
+	glGenBuffers(1, &IBO); // amount and where to store...
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); // bind it...
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); // setting locations in the IBO
 
 	// creating out VBO
 	glGenBuffers(1, &VBO); // same as VAO
@@ -84,6 +101,8 @@ void CreateTriangle()
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // bind to nothing AKA un-bind VBO
 
 	glBindVertexArray(0); // bind to 0 AKA un-bind VAO
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbinding IBO
 }
 
 void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
@@ -199,6 +218,9 @@ int main()
 		return 1;
 	}
 
+	// enable depth testing, opengl will correctly draw stuff based on its depth
+	glEnable(GL_DEPTH_TEST);
+
 	// setup viewport size (set drawable part of window)
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
@@ -249,21 +271,25 @@ int main()
 
 		// Clear Window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// use shader program we created
 		glUseProgram(shader);
 
 		glm::mat4 model;
 		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
-		//model = glm::rotate(model, curAngle * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, curAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4, 0.4, 1.0f));
 
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model)); // giving the shader our uniform value
 
-		glBindVertexArray(VAO); // work with VAO we created
+		glBindVertexArray(VAO); // work with VAO we created (it is connected with VBO)
 
-		glDrawArrays(GL_TRIANGLES, 0, 3); // draw 3 vertecies starting from 0 from our VBO (we connected VBO to VAO previously)
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); // work with IBO we created
+
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0); // use IBO to draw trianges, 12 indices, we used unsigned ints, start from 0
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // un-bind out IBO
 
 		glBindVertexArray(0); // un-bind our triangle VAO
 
