@@ -36,6 +36,12 @@ public:
 	// get uniform ambient colour location/id
 	GLuint GetAmbientColourLocation();
 
+	// get uniform diffuse intensity location/id
+	GLuint GetDiffuseIntensityLocation();
+	
+	// get uniform firection location/id
+	GLuint GetDirectionLocation();
+
 	// use the shader
 	void UseShader();
 
@@ -45,7 +51,7 @@ public:
 	~Shader();
 
 private:
-	GLuint shaderID, uniformProjection, uniformModel, uniformView, uniformAmbientIntensity, uniformAmbientColour;
+	GLuint shaderID, uniformProjection, uniformModel, uniformView, uniformAmbientIntensity, uniformAmbientColour, uniformDiffuseIntensity, uniformDirection;
 
 	// compile the shader
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
