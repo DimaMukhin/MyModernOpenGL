@@ -25,11 +25,16 @@ void Mesh::CreateMesh(GLfloat *vertices, unsigned int *indices, unsigned int num
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind our VBO
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * numOfVertices, vertices, GL_STATIC_DRAW); // theory: VBO holds vertex locations. Static means we dont change (more theory)
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);	// this is where we explain how <vertices> is structured (see documentation if you dont understand)
-															// we say that each vertex is 3 values long, values are floats, we dont want to normalize them, no stride, start from 0
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]) * 5, 0);	// this is where we explain how <vertices> is structured (see documentation if you dont understand)
+															// we say that each vertex is 3 values long, values are floats, we dont want to normalize them, 
+															// stride of 5, because every vertex has 2 extra values of texture mapping (s and t), stride is how much to jump to get to next vertex
 															// the first 0 here is very important, it will point at a 0 in out shader! (shader location)
 															// shader location is what you use to input values into the shader
 	glEnableVertexAttribArray(0); // enable the thing above so the shader can access it (first 0 matches the 0 here) (shader location)
+	
+	// same as above, now we pass/explain texture data for each vertex
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]) * 5, (void*) (sizeof(vertices[0]) * 3));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // bind to nothing AKA un-bind VBO
 	glBindVertexArray(0); // bind to 0 AKA un-bind VAO
