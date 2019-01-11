@@ -42,6 +42,15 @@ public:
 	// get uniform firection location/id
 	GLuint GetDirectionLocation();
 
+	// get uniform specular intensity location/id
+	GLuint GetSpecularIntensityLocation();
+
+	// get uniform shininess location/id
+	GLuint GetShininessLocation();
+
+	// get uniform eye position location/id
+	GLuint GetEyePositionLocation();
+
 	// use the shader
 	void UseShader();
 
@@ -51,7 +60,10 @@ public:
 	~Shader();
 
 private:
-	GLuint shaderID, uniformProjection, uniformModel, uniformView, uniformAmbientIntensity, uniformAmbientColour, uniformDiffuseIntensity, uniformDirection;
+	GLuint shaderID, uniformProjection, uniformModel, uniformView,
+		uniformAmbientIntensity, uniformAmbientColour, 
+		uniformDiffuseIntensity, uniformDirection,
+		uniformEyePosition, uniformSpecularIntensity, uniformShininess;
 
 	// compile the shader
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
