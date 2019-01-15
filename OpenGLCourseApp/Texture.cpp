@@ -18,12 +18,40 @@ Texture::Texture(const char* fileLoc)
 	fileLocation = fileLoc;
 }
 
-void Texture::LoadTexture()
+bool Texture::LoadTexture()
 {
 	unsigned char *texData = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
 	if (!texData)
 	{
 		printf("Failed to find: %s\n", fileLocation);
+		return false;
+	}
+
+	glGenTextures(1, &textureID); // generating a texture
+	glBindTexture(GL_TEXTURE_2D, textureID); // binding the texture
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // handling overflow in x axis
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // handling overflow in y axis
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // try to blend texels when you zoon out  oftexture
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // try to blend texels when you zoon into texture
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texData); // load image into our bound texture
+	glGenerateMipmap(GL_TEXTURE_2D); // generate mipmaps for us
+
+	glBindTexture(GL_TEXTURE_2D, 0); // unbind the texture
+
+	stbi_image_free(texData); // release image data from memory?
+
+	return true;
+}
+
+bool Texture::LoadTextureA()
+{
+	unsigned char *texData = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
+	if (!texData)
+	{
+		printf("Failed to find: %s\n", fileLocation);
+		return false;
 	}
 
 	glGenTextures(1, &textureID); // generating a texture
@@ -40,6 +68,8 @@ void Texture::LoadTexture()
 	glBindTexture(GL_TEXTURE_2D, 0); // unbind the texture
 
 	stbi_image_free(texData); // release image data from memory?
+
+	return true;
 }
 
 void Texture::UserTexture()
