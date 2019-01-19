@@ -99,5 +99,7 @@
   <ItemGroup>
     <None Include="Shaders\shader.vert" />
     <None Include="Shaders\shader.frag" />
+    <None Include="Shaders\directional_shadow_map.vert" />
+    <None Include="Shaders\directional_shadow_map.frag" />
   </ItemGroup>
 </Project>
